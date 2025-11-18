@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Tracking Completo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+    
+    .container { max-width: 1600px; margin: 0 auto; }
+    
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+    }
+    
+    h1 { font-size: 2.5em; margin-bottom: 10px; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .stat-card {
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: #667eea;
+    }
+    
+    .stat-label {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-value.small { font-size: 1.5em; }
+    
+    .sessions-container {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+    
+    .sessions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    h2 { font-size: 1.8em; }
+    
+    .button-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    
+    button {
+      padding: 12px 24px;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    
+    button:hover { background: #764ba2; }
+    
+    .session-card {
+      background: #0f0f0f;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #333;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .fingerprint {
+      font-family: 'Courier New', monospace;
+      color: #0af;
+      font-size: 0.9em;
+    }
+    
+    .timestamp {
+      color: #888;
+      font-size: 0.85em;
+    }
+    
+    .badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 600;
+    }
+    
+    .badge.warning {
+      background: rgba(255, 165, 0, 0.2);
+      border: 1px solid #ffa500;
+      color: #ffa500;
+    }
+    
+    .badge.danger {
+      background: rgba(255, 0, 0, 0.2);
+      border: 1px solid #ff0000;
+      color: #ff0000;
+    }
+    
+    .badge.success {
+      background: rgba(0, 255, 0, 0.2);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+    }
+    
+    .session-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .detail-label {
+      color: #888;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .detail-value {
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .location { color: #0f0; }
+    .device { color: #ff0; }
+    .warning-text { color: #f55; }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+      font-size: 1.2em;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 60px;
+      color: #666;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #333;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #333;
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .tab:hover {
+      color: #fff;
+      background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Dashboard de Tracking Completo</h1>
+      <p>Sistema avançado de monitoramento e análise de visitantes</p>
+    </header>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">👥 Visitantes Únicos</div>
+        <div class="stat-value" id="uniqueVisitors">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">📈 Total Sessões</div>
+        <div class="stat-value" id="totalSessions">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🔄 Taxa de Retorno</div>
+        <div class="stat-value" id="returnRate">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">💻 Dispositivos</div>
+        <div class="stat-value" id="uniqueDevices">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🌐 Navegador Top</div>
+        <div class="stat-value small" id="topBrowser">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🌍 País Top</div>
+        <div class="stat-value small" id="topCountry">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🏙️ Cidade Top</div>
+        <div class="stat-value small" id="topCity">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🕐 Timezone Top</div>
+        <div class="stat-value small" id="topTimezone">-</div>
+      </div>
+    </div>
+    
+    <div class="sessions-container">
+      <div class="sessions-header">
+        <h2>Análise Detalhada</h2>
+        <div class="button-group">
+          <button onclick="exportCSV()">📥 Exportar CSV</button>
+          <button onclick="loadData()">🔄 Atualizar</button>
+        </div>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('sessions')">📋 Sessões Recentes</button>
+        <button class="tab" onclick="switchTab('analytics')">📊 Analytics</button>
+      </div>
+      
+      <div id="sessionsTab" class="tab-content active">
+        <div id="sessionsContainer" class="loading">Carregando dados...</div>
+      </div>
+      
+      <div id="analyticsTab" class="tab-content">
+        <div id="analyticsContainer" class="loading">Carregando analytics...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api';
+    let currentTab = 'sessions';
+    
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      
+      if (tab === 'sessions') {
+        document.getElementById('sessionsTab').classList.add('active');
+      } else {
+        document.getElementById('analyticsTab').classList.add('active');
+        loadAnalytics();
+      }
+    }
+    
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_URL}/stats`);
+        const data = await response.json();
+        
+        if (data.success) {
+          const stats = data.stats;
+          
+          document.getElementById('uniqueVisitors').textContent = stats.uniqueVisitors;
+          document.getElementById('totalSessions').textContent = stats.totalSessions;
+          document.getElementById('returnRate').textContent = stats.returnRate;
+          document.getElementById('uniqueDevices').textContent = stats.uniqueDevices;
+          
+          const topBrowser = Object.entries(stats.browsers).sort((a,b) => b[1]-a[1])[0];
+          document.getElementById('topBrowser').textContent = topBrowser ? topBrowser[0] : 'N/D';
+          
+          const topCountry = Object.entries(stats.countries).sort((a,b) => b[1]-a[1])[0];
+          document.getElementById('topCountry').textContent = topCountry ? topCountry[0] : 'N/D';
+          
+          const topCity = Object.entries(stats.cities).sort((a,b) => b[1]-a[1])[0];
+          document.getElementById('topCity').textContent = topCity ? topCity[0].split(',')[0] : 'N/D';
+          
+          const topTimezone = Object.entries(stats.timezones).sort((a,b) => b[1]-a[1])[0];
+          const tzShort = topTimezone ? topTimezone[0].split('/').pop().replace(/_/g, ' ') : 'N/D';
+          document.getElementById('topTimezone').textContent = tzShort;
+        }
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+      }
+    }
+    
+    async function loadSessions() {
+      try {
+        const response = await fetch(`${API_URL}/sessions?limit=30`);
+        const data = await response.json();
+        const container = document.getElementById('sessionsContainer');
+        
+        if (!data.success || !data.sessions.length) {
+          container.innerHTML = `
+            <div class="no-data">
+              <h3>📭 Nenhuma sessão registrada</h3>
+              <p>Aguardando visitantes...</p>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = data.sessions.map(s => {
+          const time = new Date(s.timestamp).toLocaleString('pt-BR');
+          const location = s.city !== "N/D" 
+            ? `${s.city}, ${s.correctedRegion} - ${s.country}`
+            : 'Localização indisponível';
+          
+          let badges = '';
+          if (s.locationChanged) {
+            badges += '<span class="badge danger">📍 Local mudou</span>';
+          }
+          if (s.deviceChanged) {
+            badges += '<span class="badge danger">💻 Dispositivo mudou</span>';
+          }
+          if (s.screenChanged) {
+            badges += '<span class="badge warning">🖥️ Tela mudou</span>';
+          }
+          if (s.ipChanged) {
+            badges += '<span class="badge warning">🌐 IP mudou</span>';
+          }
+          if (s.isReturning) {
+            badges += '<span class="badge success">🔄 Retornando</span>';
+          }
+          if (s.isLocalhost) {
+            badges += '<span class="badge warning">🏠 Localhost</span>';
+          }
+          
+          return `
+            <div class="session-card">
+              <div class="session-header">
+                <span class="fingerprint">🔑 ${s.fingerprint.substring(0,20)}... | ID: ${s.visitorID?.substring(0,8)}</span>
+                <span class="timestamp">${time}</span>
+              </div>
+              ${badges ? `<div class="badges">${badges}</div>` : ''}
+              <div class="session-details">
+  <div class="detail-item">
+    <span class="detail-label">🌐 IP Público</span>
+    <span class="detail-value">${s.clientIP || s.serverDetectedIP}</span>
+  </div>
+  ${s.serverDetectedIP && s.serverDetectedIP !== s.clientIP ? `
+  <div class="detail-item">
+    <span class="detail-label">🖥️ IP Servidor</span>
+    <span class="detail-value">${s.serverDetectedIP}</span>
+  </div>
+  ` : ''}
+  <div class="detail-item">
+    <span class="detail-label">📍 Localização</span>
+    <span class="detail-value location">${location}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">💻 Dispositivo</span>
+    <span class="detail-value device">${s.audioSignature || 'N/D'}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">🖥️ Plataforma</span>
+    <span class="detail-value">${s.platform}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">📐 Resolução</span>
+    <span class="detail-value">${s.screen}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">🕐 Fuso Horário</span>
+    <span class="detail-value">${s.timezone || 'N/D'}</span>
+  </div>
+  
+  <!-- NOVAS INFORMAÇÕES -->
+  <div class="detail-item">
+    <span class="detail-label">⏰ Hora Local (PC)</span>
+    <span class="detail-value">${s.localTime || 'N/D'}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">GMT / Offset</span>
+    <span class="detail-value">${s.gmtOffset != null ? (s.gmtOffset >= 0 ? `+${s.gmtOffset}` : s.gmtOffset) : 'N/D'}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">📱 Tipo de Dispositivo</span>
+    <span class="detail-value">${s.deviceType || 'N/D'}</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-label">📱 Código Telefônico</span>
+    <span class="detail-value">${s.deviceType || 'N/D'}</span>
+  </div>
+</div>
+              ${s.org || s.currencyName ? `
+              <div class="info-grid">
+                ${s.org ? `
+                <div class="detail-item">
+                  <span class="detail-label">🏢 Provedor</span>
+                  <span class="detail-value">${s.org}</span>
+                </div>
+                ` : ''}
+                ${s.currencyName ? `
+                <div class="detail-item">
+                  <span class="detail-label">💰 Moeda</span>
+                  <span class="detail-value">${s.currencyName} (${s.currency})</span>
+                </div>
+                ` : ''}
+                ${s.languages ? `
+                <div class="detail-item">
+                  <span class="detail-label">🗣️ Idioma</span>
+                  <span class="detail-value">${s.languages.split(',')[0]}</span>
+                </div>
+                ` : ''}
+                ${s.referrer && s.referrer !== 'Direct' ? `
+                <div class="detail-item">
+                  <span class="detail-label">🔗 Origem</span>
+                  <span class="detail-value">${s.referrer}</span>
+                </div>
+                ` : ''}
+              </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Erro ao carregar sessões:', error);
+      }
+    }
+    
+    async function loadAnalytics() {
+      try {
+        const response = await fetch(`${API_URL}/stats`);
+        const data = await response.json();
+        const container = document.getElementById('analyticsContainer');
+        
+        if (!data.success) return;
+        
+        const stats = data.stats;
+        
+        const createChart = (title, data, color) => {
+          const entries = Object.entries(data).sort((a,b) => b[1] - a[1]).slice(0, 10);
+          const max = entries[0]?.[1] || 1;
+          
+          return `
+            <div style="margin-bottom: 40px;">
+              <h3 style="margin-bottom: 20px; color: ${color};">${title}</h3>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${entries.map(([key, value]) => `
+                  <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                      <span>${key}</span>
+                      <span style="color: ${color}; font-weight: bold;">${value}</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden;">
+                      <div style="width: ${(value/max)*100}%; height: 100%; background: ${color};"></div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        };
+        
+        container.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px;">
+            ${createChart('🌍 Países', stats.countries, '#667eea')}
+            ${createChart('🏙️ Cidades', stats.cities, '#764ba2')}
+            ${createChart('🌐 Navegadores', stats.browsers, '#0af')}
+            ${createChart('🖥️ Plataformas', stats.platforms, '#0f0')}
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error('Erro ao carregar analytics:', error);
+      }
+    }
+    
+    async function exportCSV() {
+      try {
+        const response = await fetch(`${API_URL}/sessions?limit=1000`);
+        const data = await response.json();
+        
+        if (!data.success) return;
+        
+        const csv = [
+          ['Timestamp', 'Fingerprint', 'IP Público', 'Cidade', 'Estado', 'País', 'Dispositivo', 'Plataforma', 'Navegador'].join(','),
+          ...data.sessions.map(s => [
+            s.timestamp,
+            s.fingerprint,
+            s.clientIP || s.serverDetectedIP,
+            s.city,
+            s.correctedRegion,
+            s.country,
+            s.audioSignature,
+            s.platform,
+            s.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)/)?.[0] || 'Other'
+          ].join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tracking_${Date.now()}.csv`;
+        a.click();
+        
+      } catch (error) {
+        console.error('Erro ao exportar:', error);
+      }
+    }
+    
+    async function loadData() {
+      await Promise.all([loadStats(), loadSessions()]);
+    }
+    
+    loadData();
+    setInterval(loadData, 15000);
+  </script>
+</body>
+</html>
